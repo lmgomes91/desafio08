@@ -71,39 +71,51 @@ const CartProvider: React.FC = ({ children }) => {
 
   const increment = useCallback(
     async id => {
-      const productIndex = products.findIndex(prod => prod.id === id);
+      // if (productIndex >= 0) {
+      //   products[productIndex].quantity += 1;
+      //   await AsyncStorage.setItem(
+      //     '@GoMarketPlace:products',
+      //     JSON.stringify(products),
+      //   );
 
-      if (productIndex >= 0) {
-        products[productIndex].quantity += 1;
-        await AsyncStorage.setItem(
-          '@GoMarketPlace:products',
-          JSON.stringify(products),
-        );
+      //   setProducts([...products]);
+      // }
 
-        setProducts([...products]);
-      }
+      const newProducts = products.map(product =>
+        product.id === id
+          ? { ...product, quantity: product.quantity + 1 }
+          : product,
+      );
+
+      setProducts(newProducts);
+
+      await AsyncStorage.setItem(
+        '@GoMarketPlace:products',
+        JSON.stringify(newProducts),
+      );
     },
     [products],
   );
 
   const decrement = useCallback(
     async id => {
-      const productIndex = products.findIndex(prod => prod.id === id);
+      const newProducts = products.map(product =>
+        product.id === id
+          ? { ...product, quantity: product.quantity - 1 }
+          : product,
+      );
 
-      if (productIndex >= 0) {
-        if (products[productIndex].quantity > 1) {
-          products[productIndex].quantity -= 1;
-        } else {
-          products.splice(productIndex, 1);
-        }
-
-        await AsyncStorage.setItem(
-          '@GoMarketPlace:products',
-          JSON.stringify(products),
-        );
-
-        setProducts([...products]);
+      const productIndex = newProducts.findIndex(prod => prod.id === id);
+      if (productIndex >= 0 && newProducts[productIndex].quantity < 1) {
+        newProducts.splice(productIndex, 1);
       }
+
+      setProducts(newProducts);
+
+      await AsyncStorage.setItem(
+        '@GoMarketPlace:products',
+        JSON.stringify(newProducts),
+      );
     },
     [products],
   );
